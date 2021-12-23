@@ -6,6 +6,7 @@
 
 clear all;
 close all;
+pkg load image;
 
 dataFile = "northridge.txt";
 dt = 0.01; # time step in seconds

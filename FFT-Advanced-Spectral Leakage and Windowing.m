@@ -15,6 +15,7 @@
 
 clear all;
 close all;
+pkg load image;
 
 # Frequencies
 # Sampling frequency in sample per seconds
