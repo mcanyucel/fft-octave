@@ -1,6 +1,9 @@
 %% Fast Fourier Transform - Frequency Resolution and Zero Padding
+%% Frequency resolution can be used in two meanings:
+%% a. Minimum frequency required to distinguish two neighboring frequencies
+%% b. The frequency whose multiples are distinguised in the frequency spectrum.
 %% This example demonstrates the effect of signal length and zero padding
-%% on frequency resolution.
+%% on the cases stated above.
 %% Mustafa Can Yucel 23.12.2020
 
 clear all;
@@ -12,7 +15,7 @@ pkg load image;
 sps = 100; # Hz or sample/seconds
 # Wave frequencies in Hz
 f1 = 4;
-f2 = 7.5;
+f2 = 5.2;
 # Amplitudes
 a1 = 1;
 a2 = 1;
@@ -22,16 +25,17 @@ c2 = 4;
 
 ts = 1/sps; # sample time increment
 
-%% CASE 1: SAMPLING DURATION IS NOT ENOUGH
+%% CASE 1: SAMPLING DURATION IS NOT ENOUGH FOR DISTINGUISHING NEIGHBORING 
+%%         FREQUENCIES
 %% When the resolution of original data is not enough to resolve contributing
 %% frequencies, zero padding will not achieve pinpoint accuracy results even
 %% in case of zero noise, since the information in the original 
 %% data is insufficient.
 
 %% In this example, the short signal frequency resolution is 
-%% 1/0.5 = 2 Hz, therefore it can distinguish only multiples of 2 Hz in the 
-%% signal. Thus, the second peak of 7 Hz (f2) is not visible 
-%% in the FFT plot. If f2 was 8 Hz, it would be visible.
+%% 1/0.5 = 2 Hz, therefore it can distinguish frequencies 2 Hz apart from one another. 
+%% Thus, the second peak of f2 is not visible (f2-f1 is 1.2 Hz) in the FFT plot. 
+%% If f2 was >= 6 Hz (e.g. 8 Hz), it would be visible.
 
 # short signal duration in seconds
 td_short = 0.5;
@@ -48,7 +52,7 @@ freq_spectrum_short = abs(y_short); # frequency spectrum (L2 norm / abs )
 fft_res_short = sps / n_short; # fft resolution
 freq_axis_short = (0:n_short).*fft_res_short; # frequency axis
 subplot(6,1,2,"align");
-plot(freq_axis_short, freq_spectrum_short);
+stem(freq_axis_short, freq_spectrum_short);
 
 # if f2 was 8 Hz instead of 7
 f22 = 8; # Hz
@@ -59,7 +63,7 @@ subplot(6,1,3,"align");
 plot(t_short, s_short2);
 title(sprintf("A short wave of %d and %d Hz (%d sps %f seconds)", f1, f22, sps, td_short));
 subplot(6,1,4,"align");
-plot(freq_axis_short, freq_spectrum_short2);
+stem(freq_axis_short, freq_spectrum_short2);
 
 % Pad zeroes to the short signal and look again
 padding_constant = 3; # we add this times original signal length of zeros
@@ -75,23 +79,25 @@ title(sprintf("A short wave of %d and %d Hz Zero Padded(%d sps %f seconds)", f1,
 fft_res_short_padded = sps / n_short_padded; # fft resolution
 freq_axis_short_padded = (0:n_short_padded).*fft_res_short_padded; # frequency axis
 subplot(6,1,6,"align");
-plot(freq_axis_short_padded, freq_spectrum_short_padded);
+stem(freq_axis_short_padded, freq_spectrum_short_padded);
 
-%% CASE 2: SAMPLING DURATION IS ADEQUATE
+%% CASE 2: SAMPLING DURATION IS ADEQUATE FOR DISTINGUISHING NEIGHBORING
+%% FREQUENCIES, BUT FREQUENCY RESOLUTION IS NOT A MULTIPLE OF THEM
 %% When the resolution of original data is enough to resolve contributing
 %% frequencies but it is not a multiple of target frequencies, zero padding
 %% will allow to identify them.
 
 %% In this example, the long signal frequency resolution is 
-%% 1/3 = 0.091 Hz, therefore it can distinguish f1 (4) and f2(7) frequencies.
-%% However, neither 4 nor 7 is a multiple of 0.091, therefore the energy of 
-%% these frequencies will leak into neighboring bins, suppressing the peaks.
+%% 1/2 = 0.5 Hz, therefore it can distinguish f1 (4) and f2(5.1) frequencies.
+%% However, 5.1 is not a multiple of 0.5, therefore the energy of 
+%% this frequency will leak into neighboring bins, suppressing the peak.
 %% Zero-padding enough values so that padded-frequency resolution will be a 
-%% multiple of these frequencies will solve this issue.
+%% multiple of these frequencies (or at least the error will be negligible) will 
+%% solve this issue.
 
 # long signal duration in seconds
 figure;
-td_long = 3;
+td_long = 2;
 t_long = (0:td_long*sps)*ts; # long duration signal time axis
 n_long = sps * td_long; # long signal total number of data points
 
@@ -106,7 +112,7 @@ freq_spectrum_long = abs(y_long); # frequency spectrum (L2 norm / abs )
 fft_res_long = sps / n_long; # fft resolution
 freq_axis_long = (0:n_long).*fft_res_long; # frequency axis
 subplot(4,1,2,"align");
-plot(freq_axis_long, freq_spectrum_long);
+stem(freq_axis_long, freq_spectrum_long);
 
 % Pad zeroes to long signal and look again
 padding_constant = 3; # we add this times original signal length of zeros
@@ -122,4 +128,4 @@ title(sprintf("A long wave of %d and %d Hz Zero Padded(%d sps %f seconds)", f1, 
 fft_res_long_padded = sps / n_long_padded; # fft resolution
 freq_axis_long_padded = (0:n_long_padded).*fft_res_long_padded; # frequency axis
 subplot(4,1,4,"align");
-plot(freq_axis_long_padded, freq_spectrum_long_padded);
+stem(freq_axis_long_padded, freq_spectrum_long_padded);
